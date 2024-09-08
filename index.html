@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>LITasdasd</title>
+    <link rel="stylesheet" href="css/kap_style.css" />
+    <!--    <link rel="stylesheet" href="css/style.css">-->
+    <link
+      rel="stylesheet"
+      href="css/leaflet.css"
+      rel="stylesheet"
+      type="text/css"
+    />
+    <script src="js/jquery-3.4.0.js"></script>
+    <script src="js/leaflet/leaflet.js"></script>
+    <script src="js/leaflet/Leaflet.Editable.js"></script>
+    <script src="js/leaflet/Leaflet.ImageOverlay.Rotated.js"></script>
+    <script src="js/server.js"></script>
+    <style>
+      .leaflet-container {
+        height: 98%;
+        width: 98%;
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      .leaflet-popup-tip-container {
+        display: none;
+      }
+
+      .leaflet-tooltip-top:before,
+      .leaflet-tooltip-bottom:before,
+      .leaflet-tooltip-left:before,
+      .leaflet-tooltip-right:before {
+      }
+
+      .lhep_obj_tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: transparent;
+        text-shadow: 1px 1px 2px black, 0 0 1em red;
+        /* Параметры тени */
+        color: white;
+        /* Белый цвет текста */
+        font-size: 1em;
+        /* Размер надписи */
+        border: none;
+      }
+
+      .leaflet-tooltip-left.myCSSClass::before {
+        border-left-color: cyan;
+      }
+
+      .leaflet-tooltip-right.myCSSClass::before {
+        border-right-color: cyan;
+      }
+    </style>
+  </head>
+
+  <body class="kap_page">
+    <script>
+      var act_builing_name;
+      var act_builing_id;
+      var act_floor_num;
+    </script>
+    <div class="kap_flex-row">
+      <div class="kap_project kap_project_beginner kap_project_beginner_menu">
+        <div class="kap_button_">
+          <p id="coord">кнопки</p>
+        </div>
+        <div class="kap_building">
+          <label for="selectBuildId">Здание:</label>
+          <div id="outputSelect"></div>
+          <!-- <select id="selectFloorId" title="Выберите здание"></select>
+                <div id="outputSelect"></div> -->
+        </div>
+        <div class="kap_floor">
+          <label for="selectFloorId">Этаж:</label>
+          <select id="selectFloorId" title="Выберите этаж">
+            <option value="”id_floor_”">Выберите этаж</option>
+            <option value="”id_floor_-1”">-1</option>
+            <option value="”id_floor_0”">0</option>
+            <option value="”id_floor_1”">1</option>
+            <option value="”id_floor_2”">2</option>
+            <option value="”id_floor_3”">3</option>
+            <option value="”id_floor_4”">4</option>
+            <option value="”id_floor_5”">5</option>
+            <option value="”id_floor_6”">6</option>
+            <option value="”id_floor_7”">7</option>
+            <option value="”id_floor_8”">8</option>
+            <option value="”id_floor_9”">9</option>
+            <option value="”id_floor_10”">10</option>
+            <option value="”id_floor_11”">11</option>
+            <option value="”id_floor_12”">12</option>
+            <option value="”id_floor_13”">13</option>
+            <option value="”id_floor_14”">14</option>
+            <option value="”id_floor_15”">15</option>
+            <option value="”id_floor_16”">16</option>
+            <option value="”id_floor_17”">17</option>
+            <option value="”id_floor_18”">18</option>
+            <option value="”id_floor_19”">19</option>
+            <option value="”id_floor_20”">20</option>
+          </select>
+        </div>
+        <div class="kap_button">
+          <input
+            class="kap_button_style"
+            type="button"
+            onclick="Remove();"
+            value="Удалить все"
+            title="Удалить все комнаты этажа"
+            style=""
+          />
+          <input
+            class="kap_button_style"
+            title="Начать редактирование всех комнат"
+            type="button"
+            onclick="StartEditing();"
+            value="Начать редактирование"
+          />
+          <input
+            class="kap_button_style"
+            title="Завершить редактирование комнат"
+            type="button"
+            onclick="FinishEditing();"
+            value="Завершить редактирование"
+          />
+          <input
+            class="kap_button_style"
+            title="Сохранить комнаты"
+            type="button"
+            onclick="save_all()"
+            value="Сохранить все комнаты"
+          />
+          <input
+            class="kap_button_style"
+            title="Сохранить иконки"
+            type="button"
+            onclick="save_all_icon()"
+            value="Сохранить все иконки"
+          />
+          <input
+            class="kap_button_style"
+            title="Сохранить линии"
+            type="button"
+            onclick="save_all_line()"
+            value="Сохранить все линии"
+          />
+          <button
+            class="kap_button_style"
+            id="butt_first_list"
+            onClick="window.open('index1.html');"
+          >
+            <span class="icon">Изменить типы маркеров</span>
+          </button>
+        </div>
+        <div class="kap_create_room">
+          <!-- <input title="Создать новые контуры комнат по клику" type="checkbox" id="create_room" name="create_room" value="create_room"> -->
+          <!-- <label for="create_room">Создать комнату</label> -->
+          <!-- <fieldset> -->
+          <legend>Выберите действие:</legend>
+          <div>
+            <input
+              type="radio"
+              id="create_room"
+              name="radio"
+              onclick="clickRadio(this)"
+              value="create_room"
+            />
+            <label for="create_room">Создать комнату</label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="create_icon"
+              name="radio"
+              onclick="clickRadio(this)"
+              value="create_icon"
+            />
+            <label for="create_icon">Создать иконку</label>
+          </div>
+          <input
+            type="text"
+            id="icon_width"
+            placeholder="введ. длину"
+            size="10"
+            hidden
+          />
+          <input
+            type="text"
+            id="icon_height"
+            placeholder="введ. ширину"
+            size="10"
+            hidden
+          />
+          <div>
+            <input
+              type="radio"
+              id="create_line"
+              name="radio"
+              onclick="clickRadio(this)"
+              value="create_line"
+            />
+            <label for="create_line">Создать линию</label>
+          </div>
+          <!-- <div>
+                        <label for="selectType">Типы:</label>
+                        <div id="outputTypeSelect"></div>
+                    </div> -->
+
+          <!-- </fieldset> -->
+        </div>
+
+        <div class="kap_table">
+          <!--               <table id=room_tbl> </table>-->
+          <table class="kap_tab_style" id="room_tbl" hidden>
+            <thead>
+              <tr>
+                <th>Уд. cтр.</th>
+                <th>Ком-рий</th>
+                <th>Док. HTTP</th>
+                <th>Дата изм.</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td></td>
+                <td>№ комнаты</td>
+                <td>
+                  <input
+                    type="text"
+                    id="text_id_0"
+                    placeholder="введ. ком-рий"
+                    size="10"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    id="data_id_0"
+                    placeholder="введ. дату"
+                    size="8"
+                  />
+                </td>
+                <!-- <td>
+                                <input class="kap_button_style_table" type="button" value="Сохр." onclick="SaveTableRoom()" title="Сохранить строку" id="save_tbl" /> </td> -->
+              </tr>
+              <tr>
+                <td></td>
+                <td>Тип комнаты</td>
+                <td>
+                  <select id="selectId_1" title="Выберите цифру">
+                    <option value="id_0">0</option>
+                    <option value="id_1">1</option>
+                    <option value="id_2">2</option>
+                    <option value="id_3">3</option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    id="data_id_1"
+                    placeholder="введ. дату"
+                    size="8"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>Подразделение</td>
+                <td>
+                  <select id="selectId_2" title="Выберите цифру">
+                    <option value="id_0">0</option>
+                    <option value="id_1">1</option>
+                    <option value="id_2">2</option>
+                    <option value="id_3">3</option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    id="data_id_2"
+                    placeholder="введ. дату"
+                    size="8"
+                  />
+                </td>
+              </tr>
+              <tr id="tr_add">
+                <td>
+                  <input
+                    class="kap_button_style_table"
+                    type="button"
+                    onclick="AddRow()"
+                    value="+ стр."
+                    title="Добавить строку"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="kap_table">
+          <table class="kap_tab_style" id="icon_tbl" hidden>
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Имя</th>
+                <th>Тип</th>
+                <th>Комм-рий</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="icon_id"></td>
+                <td>
+                  <input
+                    type="text"
+                    id="text_id_icon_0"
+                    placeholder="введ. имя"
+                    size="10"
+                  />
+                </td>
+
+                <td>
+                  <div id="outputTypeSelect"></div>
+                </td>
+                <td>
+                  <textarea
+                    id="data_id_icon_0"
+                    placeholder="введ. комм_рий"
+                  ></textarea>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="kap_table">
+          <table class="kap_tab_style" id="line_tbl" hidden>
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Имя</th>
+                <th>Длина</th>
+                <th>Комм-рий</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id="line_id"></td>
+                <td>
+                  <input
+                    type="text"
+                    id="text_id_line_0"
+                    placeholder="введ. имя"
+                    size="10"
+                  />
+                </td>
+
+                <td>длина</td>
+                <td>
+                  <textarea
+                    id="data_id_line_0"
+                    placeholder="введ. комм_рий"
+                  ></textarea>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="kap_project kap_project_beginner kap_project_beginner_map">
+        <div id="litmap"></div>
+      </div>
+    </div>
+    <script>
+      var a1 = 1.5 / (114133 / 99400) / 4.8684;
+      var a2 = -2.88 / 3.696 + 370 / 3.696;
+      var b1 = -1.5 / (114133 / 99400) / 4.8684;
+      var b2 = -2.89 / 3.696 + 284 / 3.696;
+      var a1 = 2;
+      var a2 = 50;
+      var b1 = 2;
+      var b2 = 50;
+
+      L.CRS.MySimple = L.extend({}, L.CRS.Simple, {
+        // At zoom 0, tile 268x268px should represent the entire "world" of size 8576x8576.
+        // scale is therefore 8576 / 268 = 32 (use the reverse in transformation, i.e. 1/32).
+        // We want the center of tile 0/0/0 to be coordinates [0, 0], so offset is 8576 * 1/32 / 2 = 268 / 2 = 134.
+        transformation: new L.Transformation(0.1, 0.1, 0.1, 0.1),
+      });
+
+      var lit_map;
+
+      var roomsGrp = L.layerGroup();
+      var lit_map = L.map("litmap", {
+        crs: L.CRS.Simple,
+        editable: true,
+      }).setView([1000, 1000], 10);
+      console.log("zoom" + lit_map.getZoom());
+      roomsGrp.addTo(lit_map);
+      bounds = [
+        [8.01, -47.44],
+        [95.13, 135.76],
+      ];
+      var bounds = [
+        [0, 0],
+        [4204 / 4, 2970 / 4],
+      ];
+      var dx = 0, dy =0; 
+      var bounds = [
+        [dy, dx],
+        [4204/4 - dy , 2970/4 + dx],
+      ];
+
+      console.log("bounds" + bounds);
+      var mymap = lit_map;
+
+      //        var roomsGrp = L.layerGroup();
+      //        var lit_map = L.map('litmap', {
+      //            editable: true
+      //            , crs: L.CRS.Simple
+      //        });
+
+      //        var lit_map = L.map('litmap', {
+      //            crs: L.CRS.Simple,
+      //            maxZoom: 7,
+      //        }).setView([1000,1000], 3);
+      //
+
+      lit_map.setZoom(0);
+      lit_map.panTo([20, 20]);
+      var mymap = lit_map;
+
+      //============================================================================
+      L.EditControl = L.Control.extend({
+        options: {
+          position: "topleft",
+          callback: null,
+          kind: "",
+          html: "",
+        },
+        onAdd: function (map) {
+          var container = L.DomUtil.create(
+              "div",
+              "leaflet-control leaflet-bar"
+            ),
+            link = L.DomUtil.create("a", "", container);
+          link.href = "#";
+          link.title = "Create a new " + this.options.kind;
+          link.innerHTML = this.options.html;
+          L.DomEvent.on(link, "click", L.DomEvent.stop).on(
+            link,
+            "click",
+            function () {
+              window.LAYER = this.options.callback.call(map.editTools);
+            },
+            this
+          );
+          return container;
+        },
+      });
+      console.log("leaf 2 1");
+      L.NewLineControl = L.EditControl.extend({
+        options: {
+          position: "topleft",
+          callback: mymap.editTools.startPolyline,
+          kind: "line",
+          html: "\\/\\",
+        },
+      });
+      console.log("leaf 2 2");
+      L.NewPolygonControl = L.EditControl.extend({
+        options: {
+          position: "topleft",
+          callback: mymap.editTools.startPolygon,
+          kind: "polygon",
+          html: "▰",
+        },
+      });
+      L.NewMarkerControl = L.EditControl.extend({
+        options: {
+          position: "topleft",
+          callback: mymap.editTools.startMarker,
+          kind: "marker",
+          html: "🖈",
+        },
+      });
+      L.NewRectangleControl = L.EditControl.extend({
+        options: {
+          position: "topleft",
+          callback: mymap.editTools.startRectangle,
+          kind: "rectangle",
+          html: "⬛️",
+        },
+      });
+      L.NewCircleControl = L.EditControl.extend({
+        options: {
+          position: "topleft",
+          callback: mymap.editTools.startCircle,
+          kind: "circle",
+          html: "⬤",
+        },
+      });
+      //=============================================================
+
+      var move_x,
+        move_y = 0;
+      poly_data = [];
+      icon_data = [];
+      line_data = [];
+      lit_map.on("click", onMapClick);
+
+      // let sel_mark = document.getElementById("select_get_types");
+
+      function onMapClick(e) {
+        ClearTable();
+        navigator.clipboard.writeText(e.latlng.lat + "," + e.latlng.lng);
+
+        //$('#coord').html('Coord=[' + e.latlng.lat + ',' + e.latlng.lng + ']');
+        move_y = e.latlng.lat;
+        move_x = e.latlng.lng;
+        if (document.getElementById("create_icon").checked) {
+          icon_w = document.getElementById("icon_width").value;
+          icon_h = document.getElementById("icon_height").value;
+          if (icon_w == "" || icon_h == "") {
+            icon_w = 38;
+            icon_h = 95;
+          }
+          console.log("create_icon " + move_x + " onMapClick " + move_y);
+          var h = 50;
+          let obj = document.getElementById("select_get_types");
+          let obj_type = obj.options[obj.selectedIndex].value;
+          let obj_name = obj.options[obj.selectedIndex].text;
+          // let obj_name = "undefined"
+          console.log(obj_type, obj_name);
+          //let url = 'http://127.0.0.1:8082/get_icon?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+          let url =
+            "https://lt-svr230.jinr.ru:8082/get_icon?" +
+            "object_type=" +
+            obj_type.toString() +
+            "&object_name=" +
+            obj_name.toString();
+
+          var greenIcon = L.icon({
+            iconUrl: url,
+            iconSize: [icon_w, icon_h], // size of the icon
+            iconAnchor: [icon_w - 16, icon_h], // point of the icon which will correspond to marker's location
+            popupAnchor: [-3, -30], // point from which the popup should open relative to the iconAnchor
+          });
+
+          //let url1 = 'http://127.0.0.1:8082/get_shape?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+          let url1 =
+            "https://lt-svr230.jinr.ru:8082/get_icon?" +
+            "object_type=" +
+            obj_type.toString() +
+            "&object_name=" +
+            obj_name.toString();
+          fetch(url1)
+            .then((response) => {
+              if (response.ok) {
+                console.log("connected");
+                return response.text();
+              }
+            })
+            .then((data) => {
+              // console.log(data);
+              greenIcon.iconSize = data;
+            });
+          obj_name = "undef";
+          var green_mark = L.marker([move_y, move_x], {
+            icon: greenIcon,
+          }).addTo(lit_map);
+          icon_data.push(green_mark);
+          green_mark.enableEdit();
+          green_mark.icon_attrib = {
+            type: obj_type,
+            name: obj_name,
+            size: [icon_w, icon_h],
+            description: [],
+          };
+        } else if (document.getElementById("create_room").checked) {
+          console.log("create_room " + move_x + " onMapClick " + move_y);
+          var h = 50;
+
+          var polygon = L.polygon(
+            [
+              [move_y, move_x],
+              [move_y, move_x + h],
+              [move_y + h, move_x + h],
+              [move_y + h, move_x],
+            ],
+            {
+              fillOpacity: 0.51,
+              color: "#808080",
+              weight: 2,
+            }
+          ).addTo(lit_map);
+          //polygon new room
+          poly_data.push(polygon);
+          polygon.enableEdit();
+        } else if (document.getElementById("create_line").checked) {
+          console.log("create_line " + move_x + " " + move_y);
+          var h = 50;
+
+          var polyline0 = L.polyline(
+            [
+              [move_y, move_x],
+              [move_y + h, move_x + h],
+            ],
+            {
+              fillOpacity: 0.51,
+              color: "#808080",
+              weight: 2,
+            }
+          ).addTo(lit_map);
+
+          line_data.push(polyline0);
+          polyline0.enableEdit();
+          // line_data.forEach(element => {
+          //     console.log("line " +element);
+          // });
+        } else {
+          console.log("checkbox in false position");
+        }
+      }
+      lit_map.setZoom(0);
+      var lit_ctrl = L.control
+        .scale({
+          position: "topleft",
+          metric: true,
+        })
+        .addTo(lit_map);
+
+      function clickRadio(el) {
+        var siblings = document.querySelectorAll(
+          "input[type='radio'][name='" + el.name + "']"
+        );
+        for (var i = 0; i < siblings.length; i++) {
+          if (siblings[i] != el) siblings[i].oldChecked = false;
+        }
+        if (el.oldChecked) {
+          el.checked = false;
+          document.getElementById("icon_height").hidden = true;
+          document.getElementById("icon_width").hidden = true;
+          document.getElementById("icon_tbl").hidden = true;
+          document.getElementById("room_tbl").hidden = true;
+          document.getElementById("line_tbl").hidden = true;
+        }
+        el.oldChecked = el.checked;
+        if (el.checked && el.id == "create_room") {
+          document.getElementById("icon_height").hidden = true;
+          document.getElementById("icon_width").hidden = true;
+          document.getElementById("icon_tbl").hidden = true;
+          document.getElementById("room_tbl").hidden = false;
+          document.getElementById("line_tbl").hidden = true;
+        } else if (el.checked && el.id == "create_icon") {
+          ClearIconTable();
+
+          document.getElementById("icon_height").hidden = false;
+          document.getElementById("icon_width").hidden = false;
+          document.getElementById("icon_tbl").hidden = false;
+          document.getElementById("room_tbl").hidden = true;
+          document.getElementById("line_tbl").hidden = true;
+        } else if (el.checked && el.id == "create_line") {
+          document.getElementById("icon_height").hidden = true;
+          document.getElementById("icon_width").hidden = true;
+          document.getElementById("icon_tbl").hidden = true;
+          document.getElementById("room_tbl").hidden = true;
+          document.getElementById("line_tbl").hidden = false;
+        }
+      }
+
+      function imageChange() {
+        let floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        let sel_building = document.getElementById("select_get_building_id");
+        let opt_ind = sel_building.selectedIndex;
+        let opt_act = sel_building.options[opt_ind];
+        act_builing_name = sel_building.options[opt_ind].text;
+        if (act_builing_name.indexOf(" ") > -1) {
+          act_builing_name = act_builing_name.split(" ")[0];
+        }
+        act_builing_name = act_builing_name.replace("к", "k");
+        act_builing_id = sel_building.options[opt_ind].value;
+        act_floor_num = "";
+
+        let build_id = act_builing_id;
+        if (floor_num != "Выберите этаж") {
+          image = document.createElement("img");
+          let image_src =
+            "images/1/" + act_builing_name + "_" + floor_num + ".png";
+          lit_map.eachLayer(function (layer) {
+            if (layer.mytype == "floor_image") {
+              debugger;
+              lit_map.removeLayer(layer);
+            }
+          });
+          image.src = image_src;
+          plan = L.imageOverlay(image, bounds);
+          plan.mytype = "floor_image";
+          plan.addTo(lit_map);
+
+          load_all();
+        }
+      }
+
+      function buildingChange() {
+        let sel_building = document.getElementById("select_get_building_id");
+        let opt_ind = sel_building.selectedIndex;
+        let opt_act = sel_building.options[opt_ind];
+        act_builing_name = sel_building.options[opt_ind].text;
+
+        if (act_builing_name.indexOf(" ") > -1) {
+          act_builing_name = act_builing_name.split(" ")[0];
+        }
+
+        act_builing_id = sel_building.options[opt_ind].value;
+        act_floor_num = "";
+        debugger;
+        document.getElementById("selectFloorId").options[0].selected = true;
+        lit_map.eachLayer(function (layer) {
+          if (layer.mytype == "floor_image") {
+            debugger;
+            lit_map.removeLayer(layer);
+          }
+        });
+
+        Remove();
+      }
+
+      var select_floor = document.querySelector("#selectFloorId");
+      select_floor.addEventListener("change", imageChange);
+
+      var table_id = document.getElementById("room_tbl");
+      table_id.onchange = function (event) {
+        let target = event.target;
+        if (target.tagName == "INPUT" || target.tagName == "SELECT") {
+          SaveTableRoom();
+        }
+      };
+      table_id.onclick = function (event) {
+        let target = event.target;
+        if (
+          event.isTrusted &&
+          target.tagName == "INPUT" &&
+          target.title == "удалить"
+        ) {
+          SaveTableRoom();
+        }
+      };
+
+      var table_icon_id = document.getElementById("icon_tbl");
+      table_icon_id.onchange = function (event) {
+        let target = event.target;
+        if (
+          (target.tagName == "INPUT" || target.tagName == "TEXTAREA") &&
+          document.getElementById("create_icon").checked == false
+        ) {
+          SaveTableIcon();
+        }
+        if (
+          document.getElementById("create_icon").checked == false &&
+          target.tagName == "SELECT"
+        ) {
+          SaveTableIcon();
+        }
+      };
+
+      var table_line_id = document.getElementById("line_tbl");
+      table_line_id.onchange = function (event) {
+        let target = event.target;
+        if (target.tagName == "INPUT" || target.tagName == "TEXTAREA") {
+          SaveTableLine();
+        }
+      };
+      document.getElementById("icon_width").onchange = function (event) {
+        if (document.getElementById("create_icon").checked == false) {
+          SaveTableIcon();
+        }
+      };
+
+      document.getElementById("icon_height").onchange = function (event) {
+        if (document.getElementById("create_icon").checked == false) {
+          SaveTableIcon();
+        }
+      };
+
+      var row_count = 2;
+
+      function DeleteRow(i) {
+        let str = "tr_" + i;
+        var row = document.getElementById(str);
+        console.log(row);
+        row.parentNode.removeChild(row);
+      }
+
+      function AddRow() {
+        DeleteRow("add");
+        row_count++;
+        let cell = "";
+        var tbl = document.getElementById("room_tbl");
+        var lastrow = tbl.rows[tbl.rows.length - 1];
+
+        cell +=
+          '<tr id="tr_' +
+          row_count +
+          '"><td><input class="kap_button_style_table" title="удалить" type="button" onclick="DeleteRow(' +
+          row_count +
+          ');" id="button_' +
+          row_count +
+          '"value="-стр."/></td>\
+                    <td><input type="text" id= "text_id_' +
+          row_count +
+          '" name="text_id" placeholder="введ. комм-рий" size="10"> </td>\
+                    <td><select id="selectId_' +
+          row_count +
+          '" title="Выберите цифру">\
+                    <option value=”id_0”>0</option>\
+                    <option value=”id_1”>1</option>\
+                    <option value=”id_2”>2</option>\
+                    <option value=”id_3”>3</option>\
+                    </select></td>\
+                    <td><input type="text" id= "data_id_' +
+          row_count +
+          '" name="data_id" placeholder="введ. дату" size="8"></td>\
+                    </tr>';
+        cell +=
+          '<tr id="tr_add"><td><input class="kap_button_style_table" type="button" onclick="AddRow()" value="+ стр." title="Добавить строку" /></td></tr>';
+        lastrow.insertAdjacentHTML("afterend", cell);
+      }
+      var room_desc;
+
+      function SaveTableRoom() {
+        console.log("active_room " + active_room);
+        room_desc = [];
+        let tbl = document.getElementById("room_tbl");
+        let room_name = "und";
+        for (var i = 1, row; (row = tbl.rows[i]); i++) {
+          var tr_id = Number(row.id.slice(3));
+
+          if (i == 1) {
+            room_name = document.getElementById("text_id_" + 0).value;
+            room_desc.push({
+              field1: row.cells[1].innerText,
+              field2: document.getElementById("text_id_" + 0).value,
+              field3: document.getElementById("data_id_" + 0).value,
+            });
+            continue;
+          }
+
+          // if (i == 2 || i == 3) {
+
+          //     let sel_val = document.getElementById("selectId_" + (i-1));
+          //     room_desc.push({
+          //         "field1": row.cells[1].innerText,
+          //         "field2": sel_val.options[sel_val.selectedIndex].value,
+          //         "field3": document.getElementById("data_id_" + (i-1)).value
+          //     });
+          //     continue;
+
+          // }
+
+          // if (!isNaN(tr_id)) {
+          //     let sel_val = document.getElementById("selectId_" + (tr_id));
+          //     room_desc.push({
+          //         "field1": document.getElementById("text_id_" + tr_id).value,
+          //         "field2": sel_val.options[sel_val.selectedIndex].value,
+          //         "field3": document.getElementById("data_id_" + (tr_id)).value
+          //     });
+
+          // }
+          active_room.room_attrib.name = room_name;
+          active_room.room_attrib.description = room_desc;
+          active_room
+            .bindTooltip(room_name, {
+              permanent: true,
+              direction: "center",
+              className: "lhep_obj_tooltip",
+            })
+            .openTooltip();
+        }
+        console.log("SaveTableRoom room_desc " + JSON.stringify(room_desc));
+      }
+
+      function SaveTableIcon() {
+        let tbl = document.getElementById("icon_tbl");
+        console.log("active icon " + active_icon);
+        icon_desc = [];
+
+        icon_width = document.getElementById("icon_width").value;
+        icon_height = document.getElementById("icon_height").value;
+
+        icon_name = document.getElementById("text_id_icon_0").value;
+        obj = document.getElementById("select_get_types");
+        icon_type = obj.options[obj.selectedIndex].value;
+
+        icon_desc.push(document.getElementById("data_id_icon_0").value);
+        str = "";
+        icon_desc[0] = escape(icon_desc[0]);
+        active_icon.icon_attrib.type = icon_type;
+        active_icon.icon_attrib.name = icon_name;
+        active_icon.icon_attrib.size = [icon_width, icon_height];
+        active_icon.icon_attrib.description = icon_desc;
+        active_icon
+          .bindTooltip(icon_name, {
+            permanent: true,
+            direction: "center",
+            className: "lhep_obj_tooltip",
+          })
+          .openTooltip();
+
+        console.log("SaveTableIcon icon_desc " + JSON.stringify(icon_desc));
+      }
+
+      function SaveTableLine() {
+        let tbl = document.getElementById("line_tbl");
+        console.log("active line " + active_line);
+        line_desc = [];
+
+        line_name = document.getElementById("text_id_line_0").value;
+        // obj = document.getElementById("select_get_types");
+        // icon_type = obj.options[obj.selectedIndex].value;
+
+        line_desc.push(document.getElementById("data_id_line_0").value);
+        str = "";
+        line_desc[0] = escape(line_desc[0]);
+        // active_line.icon_attrib.type = line_type;
+        active_line.line_attrib.name = line_name;
+        active_line.line_attrib.description = line_desc;
+        active_line
+          .bindTooltip(line_name, {
+            permanent: true,
+            direction: "center",
+            className: "lhep_obj_tooltip",
+          })
+          .openTooltip();
+
+        console.log("SaveTableLine line_desc " + JSON.stringify(line_desc));
+      }
+
+      function StartEditing() {
+        // ClearTable();
+        debugger;
+        console.log(poly_data);
+
+        for (let i of poly_data) {
+          i.enableEdit();
+          console.log("ok0");
+        }
+        for (let i of icon_data) {
+          i.enableEdit();
+          console.log("ok1");
+        }
+
+        console.log(line_data);
+        for (let i of line_data) {
+          i.enableEdit();
+          console.log("ok2");
+        }
+      }
+
+      function FinishEditing() {
+        for (let i of poly_data) {
+          i.disableEdit();
+        }
+        for (let i of icon_data) {
+          i.disableEdit();
+        }
+        for (let i of line_data) {
+          i.disableEdit();
+        }
+      }
+
+      function ClearTable() {
+        room_desc = [];
+        icon_desc = [];
+        let tbl = document.getElementById("room_tbl");
+        var elms = document.querySelectorAll("[title='удалить']");
+
+        for (let i = 0; i < elms.length; i++) {
+          elms[i].click();
+        }
+
+        for (var i = 1, row; (row = tbl.rows[i]); i++) {
+          var tr_id = Number(row.id.slice(3));
+
+          if (i == 1) {
+            document.getElementById("text_id_" + 0).value = "";
+            document.getElementById("data_id_" + 0).value = "";
+            continue;
+          }
+
+          if (i == 2 || i == 3) {
+            document.getElementById("selectId_" + (i - 1)).selectedIndex = 0;
+            document.getElementById("data_id_" + (i - 1)).value = "";
+            continue;
+          }
+        }
+      }
+
+      function ClearIconTable() {
+        document.getElementById("icon_width").value = "";
+        document.getElementById("icon_height").value = "";
+        document.getElementById("text_id_icon_0").value = "";
+        document.getElementById("data_id_icon_0").value = "";
+        document.getElementById("select_get_types").selectedIndex = 0;
+      }
+
+      function ClearLineTable() {
+        document.getElementById("text_id_line_0").value = "";
+        document.getElementById("data_id_line_0").value = "";
+        document.getElementById("line_id").innerText = "";
+        // document.getElementById("select_get_types").selectedIndex = 0;
+      }
+
+      var poly_data = [];
+
+      function showIconDescr(icon_id, icon_obj_num) {
+        ClearIconTable();
+        console.log(
+          "Icon popup ID= " +
+            icon_id +
+            " Icon num in arrray " +
+            icon_obj_num +
+            " icon=" +
+            icon_data[icon_obj_num] +
+            " icon_attrib = " +
+            JSON.stringify(icon_data[icon_obj_num].icon_attrib)
+        );
+        console.log(
+          "!!!icon_size!!!: " +
+            icon_data[icon_obj_num].icon_attrib.size[0] +
+            " " +
+            icon_data[icon_obj_num].icon_attrib.size[1]
+        );
+        active_icon = icon_data[icon_obj_num];
+        document.getElementById("icon_id").innerText = icon_id;
+        document.getElementById("text_id_icon_0").value =
+          icon_data[icon_obj_num].icon_attrib.name;
+        document.getElementById("select_get_types").value =
+          icon_data[icon_obj_num].icon_attrib.type;
+        document.getElementById("icon_width").value =
+          icon_data[icon_obj_num].icon_attrib.size[0];
+        document.getElementById("icon_height").value =
+          icon_data[icon_obj_num].icon_attrib.size[1];
+
+        let des = icon_data[icon_obj_num].icon_attrib.description;
+        console.log("des: " + JSON.stringify(des));
+        if (des) {
+          document.getElementById("data_id_icon_0").value = des;
+        } else {
+          console.log("description is empty");
+        }
+      }
+
+      function showLineDescr(line_id, line_obj_num) {
+        ClearLineTable();
+        console.log(
+          "Line popup ID= " +
+            line_id +
+            " line num in array " +
+            line_obj_num +
+            " line=" +
+            line_data[line_obj_num] +
+            " line_attrib = " +
+            JSON.stringify(line_data[line_obj_num].line_attrib)
+        );
+
+        active_line = line_data[line_obj_num];
+        document.getElementById("line_id").innerText = line_id;
+        document.getElementById("text_id_line_0").value =
+          line_data[line_obj_num].line_attrib.name;
+        // document.getElementById("select_get_types").value = icon_data[icon_obj_num].icon_attrib.type;
+
+        let des = line_data[line_obj_num].line_attrib.description;
+        console.log("des: " + JSON.stringify(des));
+        if (des) {
+          document.getElementById("data_id_line_0").value = des;
+        } else {
+          console.log("description is empty");
+        }
+      }
+
+      function showRoomDescr(room_id, room_obj_num) {
+        ClearTable();
+        console.log(
+          "Rom popup ID= " +
+            room_id +
+            " Rom num in arrray " +
+            room_obj_num +
+            " Poilygone=" +
+            poly_data[room_obj_num] +
+            " room_attrib = " +
+            JSON.stringify(poly_data[room_obj_num].room_attrib)
+        );
+        active_room = poly_data[room_obj_num];
+        document.getElementById("text_id_0").value =
+          poly_data[room_obj_num].room_attrib.name;
+        let des = poly_data[room_obj_num].room_attrib.description;
+        console.log("des: " + JSON.stringify(des));
+
+        if (des.length) {
+          document.getElementById("data_id_0").value = des[0]["field3"];
+          for (let i = 1; i < 3; i++) {
+            document.getElementById("selectId_" + i).value = des[i]["field2"];
+            document.getElementById("data_id_" + i).value = des[i]["field3"];
+          }
+          if (des.length > 3) {
+            for (let j = 3; j < des.length; j++) {
+              AddRow();
+
+              document.getElementById("text_id_" + row_count).value =
+                des[j]["field1"];
+              document.getElementById("selectId_" + row_count).value =
+                des[j]["field2"];
+              document.getElementById("data_id_" + row_count).value =
+                des[j]["field3"];
+            }
+          }
+        } else {
+          console.log("description is empty");
+        }
+      }
+      function rescaleXY([x, y]) {
+        return [x, y];
+        //    return [100 - y/100 , x/100 ];
+      }
+      function DrawData(room_data, room_id) {
+        let data = room_data["geometry"]["coordinates"];
+        let room_attrib = room_data["properties"];
+        if (typeof data != "undefined") {
+          console.log(" data " + data);
+          coord = [];
+          for (let i = 0; i < data.length; i++) {
+            coord.push(rescaleXY(data[i]));
+          }
+          console.log("coordinates figure: " + coord);
+          let room_new = L.polygon(coord, {
+            fillOpacity: 0.51,
+            color: "#808080",
+            weight: 2,
+          }).addTo(lit_map);
+          room_new.room_info = room_data;
+          poly_data.push(room_new);
+          let descr =
+            "<a href='#' onclick='showRoomDescr(" +
+            room_id +
+            "," +
+            (poly_data.length - 1) +
+            ");'> Room " +
+            (poly_data.length - 1) +
+            " </a><br>";
+          room_new.bindPopup(descr, {
+            autoPanPaddingTopLeft: [50, 50],
+            className: "lhep_obj_popup",
+          }).on;
+          room_new
+            .bindTooltip(room_attrib.name, {
+              permanent: true,
+              direction: "center",
+              className: "lhep_obj_tooltip",
+            })
+            .openTooltip();
+
+          room_new.on("click", onRoomClick, poly_data.length - 1);
+          room_new.room_attrib = room_attrib;
+          // console.log(poly_data.length - 1 + ' all data = ' + JSON.stringify(room_data));
+          // console.log(poly_data.length - 1 + ' room_attrib = ' + JSON.stringify(room_attrib));
+        } else {
+          console.error(" undefined room coordinates!!!! " + room_id);
+        }
+      }
+
+      function onRoomClick(e, num) {
+        document.getElementById("icon_width").hidden = true;
+        document.getElementById("icon_height").hidden = true;
+
+        document.getElementById("icon_tbl").hidden = true;
+        document.getElementById("room_tbl").hidden = false;
+        document.getElementById("line_tbl").hidden = true;
+
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_line").checked = false;
+
+        let p = e.layerPoint;
+        console.log(
+          num +
+            " RoomClick " +
+            JSON.stringify(e.room_attrib) +
+            e.layerPoint +
+            " " +
+            JSON.stringify(p.room_attrib)
+        );
+      }
+
+      function onIconClick(e, num) {
+        document.getElementById("icon_width").hidden = false;
+        document.getElementById("icon_height").hidden = false;
+
+        document.getElementById("icon_tbl").hidden = false;
+        document.getElementById("room_tbl").hidden = true;
+        document.getElementById("line_tbl").hidden = true;
+
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_line").checked = false;
+
+        let p = e.layerPoint;
+        console.log(
+          num +
+            " IconClick " +
+            JSON.stringify(e.icon_attrib) +
+            e.layerPoint +
+            " " +
+            JSON.stringify(p.icon_attrib)
+        );
+      }
+
+      function onLineClick(e, num) {
+        document.getElementById("icon_width").hidden = true;
+        document.getElementById("icon_height").hidden = true;
+
+        document.getElementById("icon_tbl").hidden = true;
+        document.getElementById("room_tbl").hidden = true;
+        document.getElementById("line_tbl").hidden = false;
+
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_line").checked = false;
+
+        let p = e.layerPoint;
+        //debugger;
+        console.log(
+          num +
+            " LineClick " +
+            JSON.stringify(e.line_attrib) +
+            e.layerPoint +
+            " " +
+            JSON.stringify(p.line_attrib)
+        );
+      }
+
+      function Remove() {
+        document.getElementById("icon_width").hidden = true;
+        document.getElementById("icon_height").hidden = true;
+
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_line").checked = false;
+        for (let i = 0; i < poly_data.length; i++) {
+          poly_data[i].remove();
+        }
+        for (let i = 0; i < icon_data.length; i++) {
+          icon_data[i].remove();
+        }
+        for (let i = 0; i < line_data.length; i++) {
+          line_data[i].remove();
+        }
+        icon_data = [];
+        poly_data = [];
+        line_data = [];
+        data_array = [];
+      }
+
+      function load_all_icon() {
+        var floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        var build_id = document.getElementById("select_get_building_id");
+        build_id = build_id.options[build_id.selectedIndex].value;
+        object_type = "markers";
+
+        for (let i = 0; i < icon_data.length; i++) {
+          icon_data[i].remove();
+        }
+        icon_data = [];
+        data_array = [];
+        ClearIconTable();
+        loadUserBuildingIcon(build_id, floor_num, object_type, loadIcons);
+      }
+
+      function save_all_icon() {
+        ClearIconTable();
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_line").checked = false;
+
+        data_array = [];
+        console.log("icon_data = " + icon_data);
+
+        var floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        var build_id = document.getElementById("select_get_building_id");
+        build_id = build_id.options[build_id.selectedIndex].value;
+
+        for (var i of icon_data) {
+          i.disableEdit();
+          var poly_coord = i.getLatLng();
+          console.log("!!!!icon " + i);
+          var t1 = poly_coord["lat"];
+          var t2 = poly_coord["lng"];
+          console.log("coorinates icons " + t1 + " " + t2);
+
+          if (i.icon_attrib === undefined) {
+            var icon_name = "undef";
+            i.icon_attrib = {};
+            i.icon_attrib.description = [];
+          } else {
+            var icon_name = i.icon_attrib.name;
+            var icon_type = i.icon_attrib.type;
+          }
+          console.log("i attrib " + JSON.stringify(i.icon_attrib));
+
+          icon_json = {
+            geometry: {
+              floor: floor_num, //sss
+              coordinates: [t1, t2],
+            },
+            properties: {
+              id: icon_data.indexOf(i),
+              name: icon_name,
+              type: icon_type,
+              size: i.icon_attrib.size,
+              description: i.icon_attrib.description,
+            },
+          };
+
+          data_array.push(icon_json);
+        }
+
+        var str_data = JSON.stringify(data_array);
+        console.log("final_data= " + str_data);
+
+        saveUserBuildingIcon(build_id, floor_num, "markers", str_data);
+      }
+
+      function loadIcons(data) {
+        if (data.length != undefined) {
+          for (let i = 0; i < data.length; i++) {
+            console.log(icon_data);
+            console.log(data[i]);
+            coords = data[i].geometry.coordinates;
+            obj_type = data[i].properties.type;
+            obj = document.getElementById("select_get_types");
+            obj.value = obj_type;
+            obj_name = obj.options[obj.selectedIndex].text;
+            console.log(obj_name);
+
+            obj_size = data[i].properties.size;
+
+            obj_id = data[i].properties.id;
+            obj_desc = data[i].properties.description;
+            console.log("coord= " + coords);
+            console.log("name= " + obj_name);
+            console.log("type= " + obj_type);
+            console.log("size= " + data[i].properties.size);
+
+            //let url = 'http://127.0.0.1:8082/get_icon?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+            let url =
+              "https://lt-svr230.jinr.ru:8082/get_icon?" +
+              "object_type=" +
+              obj_type.toString() +
+              "&object_name=" +
+              obj_name.toString();
+
+            var greenIcon = L.icon({
+              iconUrl: url,
+              iconSize: [parseInt(obj_size[0], 10), parseInt(obj_size[1], 10)], // size of the icon
+              // iconAnchor: [22, 94], // point of the icon which will correspond to marker's location
+              // popupAnchor: [-3, -76] // point from which the popup should open relative to the iconAnchor
+              iconAnchor: [
+                parseInt(obj_size[0], 10) - 16,
+                parseInt(obj_size[1], 10),
+              ], // point of the icon which will correspond to marker's location
+              popupAnchor: [
+                -parseInt(obj_size[0], 10) / 2,
+                -parseInt(obj_size[1], 10),
+              ],
+            });
+
+            //let url1 = 'http://127.0.0.1:8082/get_shape?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+            let url1 =
+              "https://lt-svr230.jinr.ru:8082/get_icon?" +
+              "object_type=" +
+              obj_type.toString() +
+              "&object_name=" +
+              obj_name.toString();
+            fetch(url1)
+              .then((response) => {
+                if (response.ok) {
+                  console.log("connected");
+                  return response.text();
+                }
+              })
+              .then((data) => {
+                // console.log(data);
+                greenIcon.iconSize = data;
+              });
+
+            obj_name = data[i].properties.name;
+
+            var green_mark = L.marker(coords, {
+              icon: greenIcon,
+            }).addTo(lit_map);
+            icon_data.push(green_mark);
+            let descr =
+              "<a href='#' onclick='showIconDescr(" +
+              obj_id +
+              "," +
+              (icon_data.length - 1) +
+              ");'> Icon " +
+              (icon_data.length - 1) +
+              " </a><br>";
+
+            green_mark.bindPopup(descr, {
+              autoPanPaddingTopLeft: [50, 50],
+              className: "lhep_obj_popup",
+            }).on;
+            green_mark
+              .bindTooltip(obj_name, {
+                permanent: true,
+                direction: "center",
+                className: "lhep_obj_tooltip",
+              })
+              .openTooltip();
+
+            green_mark.on("click", onIconClick, icon_data.length - 1);
+
+            green_mark.icon_attrib = {
+              type: obj_type,
+              name: obj_name,
+              size: [parseInt(obj_size[0], 10), parseInt(obj_size[1], 10)],
+              description: obj_desc,
+            };
+          }
+        } else {
+          alert("нет маркеров для выбранного этажа");
+        }
+      }
+
+      //сохранение линий
+      function save_all_line() {
+        ClearLineTable();
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_line").checked = false;
+
+        data_array = [];
+        console.log("line_data = " + line_data);
+
+        var floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        var build_id = document.getElementById("select_get_building_id");
+        build_id = build_id.options[build_id.selectedIndex].value;
+
+        for (var i of line_data) {
+          i.disableEdit();
+          var line_coord = i.getLatLngs();
+          console.log(line_coord);
+          var new_coord = [];
+          for (var j of line_coord) {
+            var t1 = j["lat"];
+            var t2 = j["lng"];
+            new_coord.push([t1, t2]);
+          }
+          console.log("coorinates line " + new_coord);
+
+          if (i.line_attrib === undefined) {
+            var line_name = "undef";
+            i.line_attrib = {};
+            i.line_attrib.description = [];
+          } else {
+            var line_name = i.line_attrib.name;
+            //  var icon_type = i.icon_attrib.type;
+          }
+          console.log("i attrib " + JSON.stringify(i.line_attrib));
+
+          line_json = {
+            geometry: {
+              floor: floor_num, //sss
+              coordinates: new_coord,
+            },
+            properties: {
+              id: line_data.indexOf(i),
+              name: line_name,
+              // , "type": icon_type
+              description: i.line_attrib.description,
+            },
+          };
+          data_array.push(line_json);
+        }
+
+        var str_data = JSON.stringify(data_array);
+        console.log("final_data= " + str_data);
+
+        saveUserBuildingLine(build_id, floor_num, "lines", str_data);
+      }
+
+      function load_all_line() {
+        var floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        var build_id = document.getElementById("select_get_building_id");
+        build_id = build_id.options[build_id.selectedIndex].value;
+        object_type = "lines";
+
+        for (let i = 0; i < line_data.length; i++) {
+          line_data[i].remove();
+        }
+        line_data = [];
+        data_array = [];
+        ClearLineTable();
+        loadUserBuildingLine(build_id, floor_num, object_type, loadLines);
+      }
+
+      function loadLines(data) {
+        if (data.length != undefined) {
+          console.log(data);
+          for (let i = 0; i < data.length; i++) {
+            console.log(data[i]);
+            coords = data[i].geometry.coordinates;
+            // obj_type = data[i].properties.type;
+            // obj = document.getElementById("select_get_types");
+            // obj.value = obj_type;
+            // console.log(obj_name);
+
+            obj_name = data[i].properties.name;
+            obj_id = data[i].properties.id;
+            obj_desc = data[i].properties.description;
+            console.log("coord= " + coords);
+            console.log("name= " + obj_name);
+            console.log("desc= " + obj_desc);
+
+            //let url = 'http://127.0.0.1:8082/get_icon?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+            // let url = 'https://lt-svr230.jinr.ru:8082/get_icon?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+
+            var new_line = L.polyline(coords, {
+              fillOpacity: 0.51,
+              color: "#808080",
+              weight: 2,
+            }).addTo(lit_map);
+
+            //let url1 = 'http://127.0.0.1:8082/get_shape?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+            // let url1 = 'https://lt-svr230.jinr.ru:8082/get_icon?' + "object_type=" + obj_type.toString() + "&object_name=" + obj_name.toString();
+            // fetch(url1).then((response) => {
+            //     if (response.ok) {
+            //         console.log('connected');
+            //         return response.text();
+            //     }
+            // }).then((data) => {
+            //     // console.log(data);
+            //     greenIcon.iconSize = data;
+            // });
+
+            // var green_mark = L.marker(coords, {
+            //     icon: greenIcon
+            // }).addTo(lit_map);
+
+            line_data.push(new_line);
+            let descr =
+              "<a href='#' onclick='showLineDescr(" +
+              obj_id +
+              "," +
+              (line_data.length - 1) +
+              ");'> Line " +
+              (line_data.length - 1) +
+              " </a><br>";
+
+            new_line.bindPopup(descr, {
+              autoPanPaddingTopLeft: [50, 50],
+              className: "lhep_obj_popup",
+            }).on;
+
+            new_line
+              .bindTooltip(obj_name, {
+                permanent: true,
+                direction: "center",
+                className: "lhep_obj_tooltip",
+              })
+              .openTooltip();
+
+            new_line.on("click", onLineClick, line_data.length - 1);
+
+            new_line.line_attrib = {
+              id: obj_id,
+              name: obj_name,
+              description: obj_desc,
+            };
+          }
+        } else {
+          alert("нет линий для выбранного этажа");
+        }
+      }
+
+      //сохранение полигонов
+      function save_all() {
+        ClearTable();
+        document.getElementById("create_icon").checked = false;
+        document.getElementById("create_room").checked = false;
+        data_array = [];
+        console.log("poly_data = " + poly_data);
+        var floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        var build_id = document.getElementById("select_get_building_id");
+        build_id = build_id.options[build_id.selectedIndex].value;
+        console.log("select Build Id " + build_id);
+        for (var i of poly_data) {
+          i.disableEdit();
+          var poly_coord = i.getLatLngs();
+          var new_l = [];
+          for (var j of poly_coord[0]) {
+            var t1 = j["lat"];
+            var t2 = j["lng"];
+            new_l.push([t1, t2]);
+          }
+          if (i.room_attrib === undefined) {
+            var room_name = "undef";
+            i.room_attrib = {};
+            i.room_info = {};
+            i.room_info.properties = {};
+            i.room_info.properties.id = -1;
+            i.room_attrib.properties = {};
+            i.room_attrib.properties.id = -1;
+            i.room_attrib.description = [];
+          } else {
+            var room_name = i.room_attrib.name;
+          }
+          console.log("i attrib " + JSON.stringify(i.room_attrib));
+          room_json = {
+            geometry: {
+              floor: floor_num, //sss
+              coordinates: new_l,
+            },
+            properties: {
+              id: i.room_info.properties.id,
+              name: room_name,
+              description: i.room_attrib.description,
+              room_size: 0,
+            },
+          };
+          console.log(room_json);
+          // debugger;
+          data_array.push(room_json);
+        }
+        var str_data = JSON.stringify(data_array);
+        console.log("final_data= " + str_data);
+        // let build_id = 1;
+        // let floor_num = 1;
+        saveUserBuildingObject(build_id, floor_num, "rooms", str_data);
+      }
+
+      function load_all() {
+        ClearTable();
+        floor_num = document.getElementById("selectFloorId");
+        floor_num = floor_num.options[floor_num.selectedIndex].text;
+        build_id = document.getElementById("select_get_building_id");
+        build_id = build_id.options[build_id.selectedIndex].value;
+        document.getElementById("create_room").checked = false;
+        document.getElementById("create_icon").checked = false;
+
+        for (let i = 0; i < poly_data.length; i++) {
+          poly_data[i].remove();
+        }
+        poly_data = [];
+        data_array = [];
+        loadUserBuildingObject(build_id, floor_num, "rooms", callBackFunc);
+      }
+
+      function callBackFunc(data) {
+        console.log("callBackFunc" + JSON.stringify(data));
+        if (data.length != undefined && data.length != 0) {
+          for (var i = 0; i < data.length; i++) {
+            console.log("ROOM INFO " + JSON.stringify(data[i]));
+            DrawData(data[i], i); //sss
+          }
+        } else {
+          alert("для текущего этажа нет комнат");
+        }
+      }
+
+      create_select("outputSelect");
+
+      create_type_select("outputTypeSelect");
+    </script>
+  </body>
+</html>
